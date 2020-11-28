@@ -1,0 +1,102 @@
+.choose{
+	width:900px;
+	height: 300px;
+	text-align:center;
+	margin: 0 auto;
+}
+
+.btn{
+	display: inline-block;
+	width: 100px;
+	height: 40px;
+	font-size: 20px;
+	color: #999;
+	border: 1px solid #CCCCCC;
+	border-radius:10px;
+	text-align: center;
+	line-height: 40px;
+}
+
+.saizi{
+	margin: 0;
+	position: absolute;
+	left: calc(50% - 100px);
+	top: calc(50% - 100px);
+	
+}
+
+html,body{
+	margin: 0;
+	width: 100%;
+	height: 100%;
+}
+
+
+#front:checked ~.saizi{
+	transform: rotate3d(0,0,0,0deg);
+}
+
+#front:checked ~ .choose [for="front"]{
+	background: #00BFFF;
+	color: white;
+	box-shadow: 0 0 30px #999999;
+}
+#back:checked ~.saizi{
+	transform: rotate3d(0,1,0,180deg);
+}
+#back:checked ~ .choose [for="back"]{
+	background: #00BFFF;
+	color: white;
+	box-shadow: 0 0 30px #999999;
+}
+#left:checked ~.saizi{
+	transform: rotate3d(0,1,0,90deg);
+}
+#left:checked ~ .choose [for="left"]{
+	background: #00BFFF;
+	color: white;
+	box-shadow: 0 0 30px #999999;
+}
+#right:checked ~.saizi{
+	transform: rotate3d(0,1,0,-90deg);
+}
+#right:checked ~ .choose [for="right"]{
+	background: #00BFFF;
+	color: white;
+	box-shadow: 0 0 30px #999999;
+}
+#top:checked ~.saizi{
+	transform: rotate3d(1,0,0,-90deg);
+}
+#top:checked ~ .choose [for="top"]{
+	background: #00BFFF;
+	color: white;
+	box-shadow: 0 0 30px #999999;
+}
+#bottom:checked ~.saizi{
+	transform: rotate3d(1,0,0,90deg);
+}
+#bottom:checked ~ .choose [for="bottom"]{
+	background: #00BFFF;
+	color: white;
+	box-shadow: 0 0 30px #999999;
+}
+
+#big:checked ~ .saizi{
+	transform: translateZ(500px) ;
+}
+
+#big:checked ~ .choose [for="big"]{
+	background: #00BFFF;
+	color: white;
+	box-shadow: 0 0 30px #999999;
+}
+
+#small:checked ~ .saizi{
+	transform: translateZ(-500px);
+}
+#small:checked ~ .choose [for="small"]{
+	background: #00BFFF;
+	color: white;
+	box-shadow: 0 0 30px #999999;
+}

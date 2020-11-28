@@ -1,0 +1,57 @@
+			body{
+				perspective: 1000px;
+			}
+			.saizi{
+				width: 200px;
+				height: 200px;
+				margin: 200px auto;
+				position: relative;
+				transform-style: preserve-3d ;
+				transform: rotate3d(1,1,1,0deg);
+				transition: all 3s;
+				
+			}
+			.saizi:hover{
+				transform: rotate3d(1,1,1,720deg);
+			}
+			.page{
+				width: 200px;
+				height: 200px;
+				left: 0;
+				top: 0;
+				position: absolute;
+				/* 设置透明度 */
+				opacity: 0.6;
+			}
+			.front{
+				background: url(../img/1.png);
+				background-size: 100% auto;
+				transform: translateZ(100px);
+			}
+			.back{
+				background: url(../img/2.png);
+				background-size: 100% auto;
+				transform: translateZ(-100px);
+			}
+			.left{
+				background: url(../img/3.png);
+				background-size: 100% auto;
+				transform: rotateY(90deg) translateZ(100px);
+			}
+			.right{
+				background: url(../img/4.png);
+				background-size: 100% auto;
+				transform: rotateY(-90deg) translateZ(100px)
+			}
+			
+			.top{
+				background: url(../img/5.png);
+				background-size: 100% auto;
+				transform: rotateX(90deg) translateZ(100px)
+			}
+			
+			.bottom{
+				background: url(../img/6.png);
+				background-size: 100% auto;
+				transform: rotateX(-90deg) translateZ(100px)
+			}
