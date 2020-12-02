@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<style type="text/css">
+			#main{
+				width:300px;
+				height: 180px;
+				position: relative;
+			}
+			#d1{
+				width:300px;
+				height: 180px;
+				/* 背景图片 */
+				background-image: url(./img/kkx.png);
+				/* 背景图片大小 */
+				background-size: auto;
+				background-position: 400px 0px;
+				position: absolute;
+				left: 0;
+				right: 0;
+				z-index: 1;
+				}
+			#mr{
+					width:300px;
+					height: 180px;
+					/* 背景图片 */
+					background-image: url(./img/mr.png);
+					/* 背景图片大小 */
+					background-size: auto;
+					background-position: 400px 0px;
+				    animation: mr 1s steps(16) infinite; 
+					position: absolute;
+					left: 0;
+					right: 0;
+					top :-40px;
+				}
+			 
+			@keyframes  kkx{
+				from{
+					background-position: 400px 0px;
+				}
+				to{
+					background-position: 400px -2304px;
+			     }
+			}
+			@keyframes  mr{
+				from{
+					background-position: 500px 0px;
+				}
+				to{
+					background-position: 500px -3072px;
+			     }
+			}
+			
+			
+			 #kkx:checked~#main>#d1{
+				 animation: kkx 1s steps(12) infinite; 
+			 }
+			
+		</style>
+	</head>
+	<body>
+		<input type="checkbox" name="" id="kkx" value="" hidden="hidden"/>
+		<div id="main">
+			<div id="d1">
+			</div>
+			<div id="mr">
+		</div>
+		</div>
+		<label for="kkx">水龙弹</label>
+	</body>
+</html>
