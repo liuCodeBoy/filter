@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<script src="js/lcXys.js" type="text/javascript" charset="utf-8"></script>
+		<link rel="stylesheet" type="text/css" href="css/duanzi.css"/>
+	</head>
+	<body>
+		<div class="videoList">
+		</div>
+		<div class="download">刷新内容</div>
+		<div class="playPage">
+			 <video controls="controls" src="http://uvideo.spriteapp.cn/video/2020/1026/5f967bc4e7de2_wpd.mp4"></video>
+			 <div class="close"></div>
+		</div>
+		
+		<script src="getAjax.js" type="text/javascript" charset="utf-8"></script>
+		<script type="text/javascript">
+			var videoListDiv = document.querySelector(".videoList")
+			var videoList = []
+			var displayPageDom = document.querySelector(".playPage")
+			var videoDom = document.querySelector(".playPage video")
+			var closeDom = document.querySelector(".playPage .close")
+			var refreshDom = document.querySelector(".download")
+			var pageNum = 1
+			var httpUrl = "https://api.apiopen.top/getJoke?page="+pageNum+"&count=10&type=video"
+
+			getAjax(httpUrl,function(xhr){
+				var resultObj = JSON.parse(xhr.response)
+				// console.log(xhr)
+				console.log(JSON.parse(xhr.response))
+				
+				 videoList = resultObj.result;
+				 renderVideoList(videoList)
+			})
+			
+			function renderVideoList(videoList){
+				videoList.forEach(function(item,index){
+					var videoItemDiv = document.createElement("div")
+					videoItemDiv.className = "videoItem"
+					videoItemDiv.innerHTML = `
+					<div class="videoItem">
+						 <div class="videoTop">
+							 <div class="img" style="background-image: url(${item.thumbnail});"></div>
+							 <button type="button" data-index="${index}"></button>
+							 <h3 class="title">${item.text}</h3>
+							 <p><span class="icon eye"></span> <span class="num">${item.up}</span>次播放</p>
+						 </div>
+						 <div class="videoBottom">
+							 <img src="${item.header}" alt="headerImg">
+							 <div class="right">
+								 <div class="author">${item.top_comments_name}</div>
+								 <div class="comment">${item.top_comments_content}</div>
+							 </div>
+						 </div>
+					 </div>	 
+					`
+					 videoListDiv.appendChild(videoItemDiv)
+			         
+				})	
+			}
+			//加载数据
+			//通过获取到的数据渲染出视频列表
+			videoListDiv.addEventListener("click",function(e){
+				if(e.target.tagName=="BUTTON"){
+					var index = e.target.dataset.index;
+					var item = videoList[index]
+					displayPageDom.style.display = "block"
+					videoDom.src = item.video
+					videoDom.play()
+				}
+			})
+			
+			closeDom.addEventListener("click",function(e){
+				displayPageDom.style.display = "none"
+				videoDom.pause()
+			})
+			
+			//监听刷新事件
+			refreshDom.onclick = function(){
+				pageNum ++;
+				var httpUrl = "https://api.apiopen.top/getJoke?page="+pageNum+"&count=10&type=video"
+				getAjax(httpUrl,function(xhr){
+					var resultObj = JSON.parse(xhr.response)
+					 videoList = resultObj.result;
+					 videoListDiv.innerHTML = ""
+					 renderVideoList(videoList)
+					 scrollTo(0,0)
+				})
+			}
+			
+			window.onscroll = function(){
+				
+			}
+		</script>
+	</body>
+</html>
