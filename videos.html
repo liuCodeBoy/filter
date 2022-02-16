@@ -31,7 +31,7 @@
 </body>
 
 <script>
-    const MODEL_URL = '/weights'
+    const MODEL_URL = './weights'
     Promise.all([
         faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
         faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
