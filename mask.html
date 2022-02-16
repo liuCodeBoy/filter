@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>test page</title>
+    <style>
+        #imgPreview {
+            max-width: 800px;
+            max-height: 1800px;
+
+            margin: 10px auto 0px auto;
+            display: flex;
+
+        }
+
+        #img3 {
+            max-width: 800px;
+            margin: 0 auto;
+            display: block;
+            position: relative;
+
+        }
+
+        #test-canvas {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 800px;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        #prompt3 {
+            width: 100px;
+            height: 30px;
+            text-align: center;
+            margin: 10px auto 0px auto;
+            position: relative;
+
+        }
+
+        #imgSpan {
+            pointer-events: none;
+        }
+
+        input {
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        .filepath {
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+        }
+    </style>
+</head>
+
+
+<body>
+    <div id="imgPreview" style="position:relative">
+        <img src="./image/test.jpg" id="img3" />
+        <canvas id="test-canvas">
+    </div>
+    <div id="prompt3">
+        <span id="imgSpan">
+            点击上传
+        </span>
+        <input type="file" id="file" class="filepath" onchange="changepic(this)"
+            accept="image/jpg,image/jpeg,image/png,image/PNG">
+    </div>
+</body>
+<script type="text/javascript" src="//pic.youzu.com/common/jquery-1.8.3.min.js"></script>
+<script src="./js/face.js"></script>
+
+<script>
+    const prev = async () => {
+        const MODEL_URL = './weights'
+        await faceapi.loadSsdMobilenetv1Model(MODEL_URL)
+        await faceapi.loadFaceLandmarkModel(MODEL_URL)
+        await faceapi.loadFaceRecognitionModel(MODEL_URL)
+        await faceapi.loadFaceExpressionModel(MODEL_URL)
+        await faceapi.loadAgeGenderModel(MODEL_URL)
+
+
+        const input = document.getElementById('img3')
+        const detectionsWithAgeAndGender = await faceapi.detectAllFaces(input).withFaceLandmarks().withAgeAndGender().withFaceExpressions()
+
+        var canvas = document.getElementById('test-canvas');
+        const displaySize = { width: input.width, height: input.height }
+        faceapi.matchDimensions(canvas, displaySize)
+
+        const resizedDetections = faceapi.resizeResults(detectionsWithAgeAndGender, displaySize)
+        console.log(resizedDetections)
+
+        // faceapi.draw.drawFaceLandmarks(canvas, resizedDetections)
+        const minProbability = 0.05
+        faceapi.draw.drawFaceExpressions(canvas, resizedDetections, minProbability)
+
+
+        const context = canvas.getContext('2d');
+
+        //替換面部器官
+        for (const face of resizedDetections) {
+            const features = {
+                jaw: face.landmarks.positions.slice(0, 17),
+                eyebrowLeft: face.landmarks.positions.slice(17, 22),
+                eyebrowRight: face.landmarks.positions.slice(22, 27),
+                noseBridge: face.landmarks.positions.slice(27, 31),
+                nose: face.landmarks.positions.slice(31, 36),
+                eyeLeft: face.landmarks.positions.slice(36, 42),
+                eyeRight: face.landmarks.positions.slice(42, 48),
+                lipOuter: face.landmarks.positions.slice(48, 60),
+                lipInner: face.landmarks.positions.slice(60),
+            };
+
+            // for (const eye of [features.eyeLeft, features.eyeRight]) {
+            //     const eyeBox = getBoxFromPoints(eye);
+            //     const fontSize = 6 * eyeBox.height;
+
+            //     context.font = `${fontSize}px/${fontSize}px serif`;
+            //     context.textAlign = 'center';
+            //     context.textBaseline = 'bottom';
+
+            //     context.fillStyle = '#000';
+            //     context.fillText('👄', eyeBox.center.x, eyeBox.center.y + 0.6 * fontSize);
+            // }
+
+        }
+
+        resizedDetections.forEach(element => {
+            let box = element.detection.box
+            // let age = parseInt(element.age)
+            // let gender = element.gender
+            // const drawOptions = {
+            //     label: age + "_" + gender,
+            //     lineWidth: 2
+            // }
+            // const drawBox = new faceapi.draw.DrawBox(box, drawOptions)
+            // drawBox.draw(canvas)
+            //替換mask
+            var image = new Image();
+            image.src = "./image/overlay-skull_06.png";
+            let eyebrowLeft = element.landmarks.positions.slice(17, 22);
+            let eyeBox = getBoxFromPoints(eyebrowLeft);
+
+            image.onload = function () {
+                context.drawImage(image, 0, 10, image.width, image.height, box._x, eyeBox.center.y - (box._height / 2.7), box._width, box._height);
+            }
+        });
+    }
+    prev()
+
+    //計算坐標點
+    function getBoxFromPoints(points) {
+        const box = {
+            bottom: -Infinity,
+            left: Infinity,
+            right: -Infinity,
+            top: Infinity,
+
+            get center() {
+                return {
+                    x: this.left + this.width / 2,
+                    y: this.top + this.height / 2,
+                };
+            },
+
+            get height() {
+                return this.bottom - this.top;
+            },
+
+            get width() {
+                return this.right - this.left;
+            },
+        };
+
+        for (const point of points) {
+            box.left = Math.min(box.left, point.x);
+            box.right = Math.max(box.right, point.x);
+
+            box.bottom = Math.max(box.bottom, point.y);
+            box.top = Math.min(box.top, point.y);
+        }
+
+        return box;
+    }
+
+
+    function changepic() {
+        // $("#prompt3").css("display", "none");
+        var reads = new FileReader();
+        f = document.getElementById('file').files[0];
+        reads.readAsDataURL(f);
+        reads.onload = function (e) {
+            document.getElementById('img3').src = this.result;
+            $("#img3").css("display", "block");
+            var canvas = document.getElementById('test-canvas');
+            const context = canvas.getContext('2d');
+
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            prev()
+        };
+    }
+</script>
+
+</html>
