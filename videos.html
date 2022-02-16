@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./js/face.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        canvas {
+            position: absolute;
+            z-index: 10;
+        }
+    </style>
+</head>
+
+<body>
+    <video id="video" width="720" height="560" autoplay muted src=""></video>
+</body>
+
+<script>
+    const MODEL_URL = '/weights'
+    Promise.all([
+        faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+        faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+        // faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
+        faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
+    ]).then(moveToCameraAVG())
+
+    function moveToCameraAVG() {
+        if (navigator.mediaDevices === undefined) {
+            navigator.mediaDevices = {};
+        }
+        if (navigator.mediaDevices.getUserMedia === undefined) {
+            navigator.mediaDevices.getUserMedia = function (constraints) {
+                var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.oGetUserMedia;
+                if (!getUserMedia) {
+                    return Promise.reject(new Error('getUserMedia is not implemented in this browser'));
+                }
+                return new Promise(function (resolve, reject) {
+                    getUserMedia.call(navigator, constraints, resolve, reject);
+                });
+            }
+        }
+        if (window.stream) {
+            window.stream.getTracks().forEach(track => {
+                track.stop();
+            });
+        }
+        var constraints = window.constraints = {
+            audio: false,
+            video: {
+                facingMode: "user"
+            }
+        }
+        var video = document.getElementById('video');
+        navigator.mediaDevices.getUserMedia(constraints)
+            .then(function (stream) {
+                try {
+                    video.srcObject = stream;
+                } catch (error) {
+                    video.src = window.URL.createObjectURL(stream);
+                    console.error(error)
+                }
+                // self.localMediaStream = stream;
+                // video.play(); 
+            })
+            .catch(function (err) {
+                alert(err.name + ":- " + err.message);
+            });
+
+        const canvas = faceapi.createCanvas(video)
+        document.body.append(canvas)
+        const displaySize = { width: video.width, height: video.height }
+        faceapi.matchDimensions(canvas, displaySize)
+
+        video.addEventListener("play", () => {
+            setInterval(async () => {
+                const detections = await faceapi.detectAllFaces(video,
+                    new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks
+                    ().withFaceExpressions()
+                const resizedDetections = faceapi.resizeResults(detections, displaySize)
+                canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height)
+                // faceapi.draw.drawDetections(canvas, resizedDetections)
+                // faceapi.draw.drawFaceLandmarks(canvas, resizedDetections)
+                faceapi.draw.drawFaceExpressions(canvas, resizedDetections)
+                const context = canvas.getContext('2d');
+
+                //替換面部器官
+                // for (const face of resizedDetections) {
+                    // const features = {
+                    //     jaw: face.landmarks.positions.slice(0, 17),
+                    //     eyebrowLeft: face.landmarks.positions.slice(17, 22),
+                    //     eyebrowRight: face.landmarks.positions.slice(22, 27),
+                    //     noseBridge: face.landmarks.positions.slice(27, 31),
+                    //     nose: face.landmarks.positions.slice(31, 36),
+                    //     eyeLeft: face.landmarks.positions.slice(36, 42),
+                    //     eyeRight: face.landmarks.positions.slice(42, 48),
+                    //     lipOuter: face.landmarks.positions.slice(48, 60),
+                    //     lipInner: face.landmarks.positions.slice(60),
+                    // };
+
+                    resizedDetections.forEach(element => {
+                        let box = element.detection.box
+                        //替換mask
+                        var image = new Image();
+                        image.src = "./image/overlay-skull_06.png";
+                        let eyebrowLeft = element.landmarks.positions.slice(17, 22);
+                        let eyeBox = getBoxFromPoints(eyebrowLeft);
+
+                        image.onload = function () {
+                            context.drawImage(image, 0, 10, image.width, image.height, box._x, eyeBox.center.y - (box._height / 2.7), box._width, box._height);
+                        }
+                    });
+
+                // }
+            }, 100)
+        })
+    }
+
+
+    //計算坐標點
+    function getBoxFromPoints(points) {
+        const box = {
+            bottom: -Infinity,
+            left: Infinity,
+            right: -Infinity,
+            top: Infinity,
+
+            get center() {
+                return {
+                    x: this.left + this.width / 2,
+                    y: this.top + this.height / 2,
+                };
+            },
+
+            get height() {
+                return this.bottom - this.top;
+            },
+
+            get width() {
+                return this.right - this.left;
+            },
+        };
+
+        for (const point of points) {
+            box.left = Math.min(box.left, point.x);
+            box.right = Math.max(box.right, point.x);
+
+            box.bottom = Math.max(box.bottom, point.y);
+            box.top = Math.min(box.top, point.y);
+        }
+
+        return box;
+    }
+
+    moveToCameraAVG()
+
+</script>
+
+</html>
