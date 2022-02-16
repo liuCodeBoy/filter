@@ -18,6 +18,7 @@
             justify-content: center;
             align-items: center;
         }
+
         canvas {
             position: absolute;
             z-index: 10;
@@ -30,7 +31,7 @@
 </body>
 
 <script>
-    const MODEL_URL = '/weights'
+    const MODEL_URL = './filter/weights'
     Promise.all([
         faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
         faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
@@ -99,30 +100,30 @@
 
                 //替換面部器官
                 // for (const face of resizedDetections) {
-                    // const features = {
-                    //     jaw: face.landmarks.positions.slice(0, 17),
-                    //     eyebrowLeft: face.landmarks.positions.slice(17, 22),
-                    //     eyebrowRight: face.landmarks.positions.slice(22, 27),
-                    //     noseBridge: face.landmarks.positions.slice(27, 31),
-                    //     nose: face.landmarks.positions.slice(31, 36),
-                    //     eyeLeft: face.landmarks.positions.slice(36, 42),
-                    //     eyeRight: face.landmarks.positions.slice(42, 48),
-                    //     lipOuter: face.landmarks.positions.slice(48, 60),
-                    //     lipInner: face.landmarks.positions.slice(60),
-                    // };
+                // const features = {
+                //     jaw: face.landmarks.positions.slice(0, 17),
+                //     eyebrowLeft: face.landmarks.positions.slice(17, 22),
+                //     eyebrowRight: face.landmarks.positions.slice(22, 27),
+                //     noseBridge: face.landmarks.positions.slice(27, 31),
+                //     nose: face.landmarks.positions.slice(31, 36),
+                //     eyeLeft: face.landmarks.positions.slice(36, 42),
+                //     eyeRight: face.landmarks.positions.slice(42, 48),
+                //     lipOuter: face.landmarks.positions.slice(48, 60),
+                //     lipInner: face.landmarks.positions.slice(60),
+                // };
 
-                    resizedDetections.forEach(element => {
-                        let box = element.detection.box
-                        //替換mask
-                        var image = new Image();
-                        image.src = "./image/overlay-skull_06.png";
-                        let eyebrowLeft = element.landmarks.positions.slice(17, 22);
-                        let eyeBox = getBoxFromPoints(eyebrowLeft);
+                resizedDetections.forEach(element => {
+                    let box = element.detection.box
+                    //替換mask
+                    var image = new Image();
+                    image.src = "./image/overlay-skull_06.png";
+                    let eyebrowLeft = element.landmarks.positions.slice(17, 22);
+                    let eyeBox = getBoxFromPoints(eyebrowLeft);
 
-                        image.onload = function () {
-                            context.drawImage(image, 0, 10, image.width, image.height, box._x, eyeBox.center.y - (box._height / 2.7), box._width, box._height);
-                        }
-                    });
+                    image.onload = function () {
+                        context.drawImage(image, 0, 10, image.width, image.height, box._x, eyeBox.center.y - (box._height / 2.7), box._width, box._height);
+                    }
+                });
 
                 // }
             }, 100)
